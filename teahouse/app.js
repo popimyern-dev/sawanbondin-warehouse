@@ -2645,31 +2645,54 @@ function renderMasterContent(){
   const cfg = WAREHOUSE_CONFIG[masterPgFilter] || {};
 
   // หมวดหมู่ย่อยของคลังที่เลือก
-  const pgItems = masterDB.filter(m => m.pg === masterPgFilter);
-  const subcats = [...new Set(pgItems.map(m => m.subcat||'ไม่มีหมวดหมู่'))].filter(Boolean).sort();
+  const pgItems = masterPgFilter === '_alert'
+    ? masterDB.filter(m => m.min > 0 && m.stock <= m.min)
+    : masterDB.filter(m => m.pg === masterPgFilter);
+  const subcats = masterPgFilter === '_alert'
+    ? []
+    : [...new Set(pgItems.map(m => m.subcat||'ไม่มีหมวดหมู่'))].filter(Boolean).sort();
   if(!masterSubFilter || !subcats.includes(masterSubFilter)) masterSubFilter = subcats[0] || '';
 
   // รายการในหมวดย่อยนั้น
-  const filtered = pgItems.filter(m => {
-    const sub = m.subcat||'ไม่มีหมวดหมู่';
-    if(sub !== masterSubFilter) return false;
-    if(search && !m.name.toLowerCase().includes(search) && !m.code.toLowerCase().includes(search)) return false;
-    return true;
-  });
+  const filtered = masterPgFilter === '_alert'
+    ? pgItems.filter(m => !search || m.name.toLowerCase().includes(search) || m.code.toLowerCase().includes(search))
+    : pgItems.filter(m => {
+        const sub = m.subcat||'ไม่มีหมวดหมู่';
+        if(sub !== masterSubFilter) return false;
+        if(search && !m.name.toLowerCase().includes(search) && !m.code.toLowerCase().includes(search)) return false;
+        return true;
+      });
 
-  // Warehouse tabs
-  const whTabs = WAREHOUSE_PAGES.map(pg => {
-    const c = WAREHOUSE_CONFIG[pg];
+  // Warehouse tabs — แสดงเฉพาะ 3 คลัง + แจ้งเตือน ในแถวเดียว
+  const alertCount = masterDB.filter(m => m.min > 0 && m.stock <= m.min).length;
+  const whTabs = [
+    { pg: 'finish',   label: 'สินค้าสำเร็จรูป',   icon: 'ti-package' },
+    { pg: 'equip_th', label: 'อุปกรณ์ Tea House', icon: 'ti-tool' },
+    { pg: 'store2',   label: 'Store 2',            icon: 'ti-building-store' },
+  ].map(({pg, label, icon}) => {
     const cnt = masterDB.filter(m=>m.pg===pg).length;
+    const isActive = masterPgFilter === pg;
     return `<button onclick="masterPgFilter='${pg}';masterSubFilter='';renderMasterContent()"
-      style="padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;
-      ${masterPgFilter===pg
-        ? 'background:var(--ink);color:var(--surface);border:0.5px solid var(--ink);font-weight:500;box-shadow:0 2px 6px rgba(0,0,0,.15)'
-        : 'background:transparent;color:var(--ink4);border:0.5px solid var(--line);font-weight:400'}">
-      ${c?.label||pg}
-      <span style="font-size:10px;${masterPgFilter===pg?'opacity:.7':'opacity:.5'};margin-left:4px">${cnt}</span>
+      style="padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;
+      display:inline-flex;align-items:center;gap:5px;
+      ${isActive
+        ? 'background:var(--ink);color:var(--surface);border:0.5px solid var(--ink);font-weight:500;box-shadow:0 2px 6px rgba(0,0,0,.12)'
+        : 'background:transparent;color:var(--ink4);border:0.5px solid var(--line)'}">
+      <i class="ti ${icon}" style="font-size:12px"></i>
+      ${label}
+      <span style="font-size:10px;${isActive?'opacity:.7':'opacity:.45'}">${cnt}</span>
     </button>`;
-  }).join('');
+  }).join('') +
+  `<button onclick="masterPgFilter='_alert';masterSubFilter='';renderMasterContent()"
+    style="padding:6px 14px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;
+    display:inline-flex;align-items:center;gap:5px;margin-left:auto;
+    ${masterPgFilter==='_alert'
+      ? 'background:#b03030;color:#fff;border:0.5px solid #b03030;font-weight:500'
+      : `background:${alertCount?'#fde8e8':'transparent'};color:${alertCount?'#b03030':'var(--ink4)'};border:0.5px solid ${alertCount?'#e8a0a0':'var(--line)'}`}">
+    <i class="ti ti-bell" style="font-size:12px"></i>
+    แจ้งเตือน
+    ${alertCount?`<span style="font-size:10px;font-weight:500">${alertCount}</span>`:''}
+  </button>`;
 
   // Category cards
   const catCards = subcats.map(sub => {
