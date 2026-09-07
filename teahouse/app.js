@@ -2238,7 +2238,6 @@ function renderMasterPage(){
     <div class="card">
       <div class="master-search-bar">
         <input id="masterSearch" placeholder="ค้นหารายการหรือรหัส..." oninput="renderMasterContent()">
-        <div class="cat-tabs" id="masterCatTabs"></div>
       </div>
       <div id="masterContent"></div>
     </div>`;
