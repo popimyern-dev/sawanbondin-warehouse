@@ -2662,12 +2662,12 @@ function renderMasterContent(){
     const c = WAREHOUSE_CONFIG[pg];
     const cnt = masterDB.filter(m=>m.pg===pg).length;
     return `<button onclick="masterPgFilter='${pg}';masterSubFilter='';renderMasterContent()"
-      style="padding:6px 16px;border-radius:8px;border:0.5px solid var(--line);font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;
-      background:${masterPgFilter===pg?'var(--ink)':'var(--surface)'};
-      color:${masterPgFilter===pg?'var(--surface)':'var(--ink3)'};
-      border-color:${masterPgFilter===pg?'var(--ink)':'var(--line)'}">
+      style="padding:6px 16px;border-radius:8px;font-size:12px;cursor:pointer;white-space:nowrap;font-family:inherit;transition:all .15s;
+      ${masterPgFilter===pg
+        ? 'background:var(--ink);color:var(--surface);border:0.5px solid var(--ink);font-weight:500;box-shadow:0 2px 6px rgba(0,0,0,.15)'
+        : 'background:transparent;color:var(--ink4);border:0.5px solid var(--line);font-weight:400'}">
       ${c?.label||pg}
-      <span style="font-size:10px;opacity:.6;margin-left:4px">${cnt}</span>
+      <span style="font-size:10px;${masterPgFilter===pg?'opacity:.7':'opacity:.5'};margin-left:4px">${cnt}</span>
     </button>`;
   }).join('');
 
