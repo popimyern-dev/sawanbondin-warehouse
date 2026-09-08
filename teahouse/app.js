@@ -3777,7 +3777,7 @@ async function dbGenerateDailyList() {
     carriedByCode[x.item_code].push(x);
   });
 
-  const pgs = ['finish', 'store2'];
+  const pgs = ['finish', 'equip_th'];
   const needWithdraw = masterDB.filter(m =>
     pgs.includes(m.pg) && m.is_active !== false && m.min > 0 && m.stock < m.min
   );
@@ -4234,11 +4234,11 @@ async function renderDailyWithdrawPage() {
       </div>
     </div>
     ${buildSection('finish','สินค้าสำเร็จรูป (จาก Factory)','ti-package')}
-    ${buildSection('store2','Store 2','ti-building-store')}`;
+    ${buildSection('equip_th','อุปกรณ์ Tea House','ti-tool')}`;
 }
 
 function dwCopySectionText(pg) {
-  const label = pg==='finish'?'สินค้าสำเร็จรูป':'Store 2';
+  const label = pg==='finish'?'สินค้าสำเร็จรูป':'อุปกรณ์ Tea House';
   const items = dwItems.filter(x=>x.pg===pg && x.status!=='received');
   if (!items.length) { showToast(`ไม่มีรายการ${label}`,'err'); return; }
   const today = new Date().toLocaleDateString('th-TH',{day:'2-digit',month:'long',year:'numeric'});
@@ -4470,7 +4470,7 @@ async function dwAddManualItem() {
 ═══════════════════════════════════════════ */
 
 let dscCat      = '';
-let dscStore2Cat = '';
+let dscEquipCat = '';
 let dscData   = {};   // { code: { actual, note } }
 let dscSearch = '';
 
@@ -4487,17 +4487,17 @@ function dscRender() {
 
   const today = new Date().toLocaleDateString('th-TH',{weekday:'long',day:'2-digit',month:'long',year:'numeric'});
   const finishItems = masterDB.filter(m => m.pg === 'finish');
-  const store2Items = masterDB.filter(m => m.pg === 'store2');
-  const store2Subcats = [...new Set(store2Items.map(m => m.subcat||'ไม่มีหมวดหมู่'))].sort();
-  if (!dscStore2Cat || !store2Subcats.includes(dscStore2Cat)) dscStore2Cat = store2Subcats[0] || '';
+  const equip_thItems = masterDB.filter(m => m.pg === 'equip_th');
+  const equipSubcats = [...new Set(equip_thItems.map(m => m.subcat||'ไม่มีหมวดหมู่'))].sort();
+  if (!dscEquipCat || !equipSubcats.includes(dscEquipCat)) dscEquipCat = equipSubcats[0] || '';
 
   // tabs store2
-  const store2CatTabs = store2Subcats.map(sub => {
-    const subItems = store2Items.filter(m=>(m.subcat||'ไม่มีหมวดหมู่')===sub);
+  const equipCatTabs = equipSubcats.map(sub => {
+    const subItems = equip_thItems.filter(m=>(m.subcat||'ไม่มีหมวดหมู่')===sub);
     const counted  = subItems.filter(m=>dscData[m.code]!==undefined).length;
-    const isActive = sub === dscStore2Cat;
+    const isActive = sub === dscEquipCat;
     const allDone  = counted === subItems.length && subItems.length > 0;
-    return `<button onclick="dscStore2Cat='${sub.replace(/'/g,"\\'")}';dscRender()"
+    return `<button onclick="dscEquipCat='${sub.replace(/'/g,"\\'")}';dscRender()"
       style="padding:5px 14px;border-radius:20px;border:0.5px solid ${isActive?'var(--ink)':'var(--line)'};
       font-size:11px;cursor:pointer;font-family:inherit;
       background:${isActive?'var(--ink)':'transparent'};
@@ -4510,13 +4510,13 @@ function dscRender() {
   }).join('');
 
   // รายการ store2 ในหมวดที่เลือก
-  const store2Filtered = store2Items.filter(m => {
-    if ((m.subcat||'ไม่มีหมวดหมู่') !== dscStore2Cat) return false;
+  const equip_thFiltered = equip_thItems.filter(m => {
+    if ((m.subcat||'ไม่มีหมวดหมู่') !== dscEquipCat) return false;
     if (dscSearch && !m.name.toLowerCase().includes(dscSearch.toLowerCase())) return false;
     return true;
   });
-  const countedStore2Cat = store2Filtered.filter(m=>dscData[m.code]!==undefined).length;
-  const allItems = [...finishItems, ...store2Items];
+  const countedEquipCat = equip_thFiltered.filter(m=>dscData[m.code]!==undefined).length;
+  const allItems = [...finishItems, ...equip_thItems];
 
   const subcats = [...new Set(finishItems.map(m => m.subcat||'ไม่มีหมวดหมู่'))].sort();
   if (!dscCat || !subcats.includes(dscCat)) dscCat = subcats[0] || '';
@@ -4597,8 +4597,8 @@ function dscRender() {
   }
 
   const rows        = buildRows(catItems);
-  const store2Rows  = buildRows(store2Filtered);
-  const store2Counted = store2Items.filter(m=>dscData[m.code]!==undefined).length;
+  const store2Rows  = buildRows(equip_thFiltered);
+  const equip_thCounted = equip_thItems.filter(m=>dscData[m.code]!==undefined).length;
 
   div.innerHTML = `
     <div class="page-header">
@@ -4659,10 +4659,10 @@ function dscRender() {
     <div style="font-size:11px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.3px;margin-bottom:10px">
       <i class="ti ti-building-store" style="font-size:12px"></i> Store 2
     </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${store2CatTabs}</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${equipCatTabs}</div>
     <div style="border:0.5px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:8px">
       <div style="padding:8px 16px;background:var(--s2);border-bottom:0.5px solid var(--line)">
-        <span style="font-size:12px;font-weight:500">${dscStore2Cat} · ${countedStore2Cat}/${store2Filtered.length}</span>
+        <span style="font-size:12px;font-weight:500">${dscEquipCat} · ${countedEquipCat}/${equip_thFiltered.length}</span>
       </div>
       <div style="display:grid;grid-template-columns:1fr 110px 28px;padding:5px 16px;font-size:10px;color:var(--ink4);border-bottom:0.5px solid var(--line);background:var(--s2)">
         <span>รายการ</span><span style="text-align:right">นับจริง</span><span></span>
@@ -4670,11 +4670,11 @@ function dscRender() {
       ${store2Rows}
     </div>
     <div style="display:flex;gap:6px;justify-content:flex-end;margin-bottom:20px">
-      <button class="btn btn-sm" onclick="dscFillCat('${dscStore2Cat.replace(/'/g,"\\'")}',true)" style="font-size:11px">
+      <button class="btn btn-sm" onclick="dscFillCat('${dscEquipCat.replace(/'/g,"\\'")}',true)" style="font-size:11px">
         นับเท่าระบบ
       </button>
-      <button class="btn btn-sm" onclick="dscSaveCat('${dscStore2Cat.replace(/'/g,"\\'")}',true)" style="font-size:11px">
-        <i class="ti ti-check"></i> บันทึกหมวดนี้ (${countedStore2Cat})
+      <button class="btn btn-sm" onclick="dscSaveCat('${dscEquipCat.replace(/'/g,"\\'")}',true)" style="font-size:11px">
+        <i class="ti ti-check"></i> บันทึกหมวดนี้ (${countedEquipCat})
       </button>
     </div>
 
@@ -4730,7 +4730,7 @@ function dscClearRow(code) {
 
 function dscFillCat(cat, isStore2=false) {
   const items = isStore2
-    ? masterDB.filter(m=>m.pg==='store2'&&(m.subcat||'ไม่มีหมวดหมู่')===cat)
+    ? masterDB.filter(m=>m.pg==='equip_th'&&(m.subcat||'ไม่มีหมวดหมู่')===cat)
     : masterDB.filter(m=>m.pg==='finish'&&(m.subcat||'ไม่มีหมวดหมู่')===cat);
   items.forEach(m=>{
     if(!dscData[m.code]) dscData[m.code]={};
@@ -4764,7 +4764,7 @@ function dscCopy() {
 async function dscSaveCat(cat, isStore2=false) {
   let catItems;
   if (isStore2) {
-    catItems = masterDB.filter(m=>m.pg==='store2'&&(m.subcat||'ไม่มีหมวดหมู่')===cat);
+    catItems = masterDB.filter(m=>m.pg==='equip_th'&&(m.subcat||'ไม่มีหมวดหมู่')===cat);
   } else {
     catItems = masterDB.filter(m=>m.pg==='finish'&&(m.subcat||'ไม่มีหมวดหมู่')===cat);
   }
@@ -4780,7 +4780,7 @@ async function dscSaveCat(cat, isStore2=false) {
 
 async function dscSaveAll() {
   const toUpdate = masterDB.filter(m=>
-    (m.pg==='finish'||m.pg==='store2') && dscData[m.code]?.actual!==undefined
+    (m.pg==='finish'||m.pg==='equip_th') && dscData[m.code]?.actual!==undefined
   );
   if(!toUpdate.length){showToast('กรุณากรอกยอดนับก่อนนะคะ','err');return;}
   if(!confirm(`ยืนยันบันทึกทั้งหมด ${toUpdate.length} รายการและสร้างใบเบิก?`)) return;
@@ -4801,7 +4801,7 @@ async function dscDoSave(items) {
     const note   = dscData[m.code].note || null;
     await sb.from('items').update({ stock: actual }).eq('code', m.code);
     m.stock = actual;
-    if (actual < (m.min||0) && !existingCodes.has(m.code) && ['finish','store2'].includes(m.pg)) {
+    if (actual < (m.min||0) && !existingCodes.has(m.code) && ['finish','equip_th'].includes(m.pg)) {
       newWithdraw.push({
         date: today, item_code: m.code, item_name: m.name, pg: m.pg,
         current_stock: actual, max_stock: m.max||0,
