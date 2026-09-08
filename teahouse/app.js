@@ -2664,11 +2664,13 @@ function renderMasterContent(){
 
   // Warehouse tabs — แสดงเฉพาะ 3 คลัง + แจ้งเตือน ในแถวเดียว
   const alertCount = masterDB.filter(m => m.min > 0 && m.stock <= m.min).length;
-  const whTabs = [
-    { pg: 'finish',   label: 'สินค้าสำเร็จรูป',   icon: 'ti-package' },
-    { pg: 'equip_th', label: 'อุปกรณ์ Tea House', icon: 'ti-tool' },
-    { pg: 'store2',   label: 'Store 2',            icon: 'ti-building-store' },
-  ].map(({pg, label, icon}) => {
+  const whTabDefs = [
+    { pg: 'finish',   icon: 'ti-package' },
+    { pg: 'equip_th', icon: 'ti-tool' },
+    { pg: 'store2',   icon: 'ti-building-store' },
+  ];
+  const whTabs = whTabDefs.map(({pg, icon}) => {
+    const label = WAREHOUSE_CONFIG[pg]?.label || pg;
     const cnt = masterDB.filter(m=>m.pg===pg).length;
     const isActive = masterPgFilter === pg;
     return `<button onclick="masterPgFilter='${pg}';masterSubFilter='';renderMasterContent()"
