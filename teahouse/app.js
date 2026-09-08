@@ -3473,7 +3473,7 @@ async function renderStockCountPage() {
         oninput="scSearch=this.value;renderStockCountPage()" style="max-width:280px">
     </div>
     ${sectionFinish?`<div style="font-size:11px;font-weight:500;color:var(--ink4);margin:0 0 6px;text-transform:uppercase;letter-spacing:.3px">สินค้าสำเร็จรูป</div>${sectionFinish}`:''}
-    ${sectionStore2?`<div style="font-size:11px;font-weight:500;color:var(--ink4);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.3px">Store 2</div>${sectionStore2}`:''}
+    ${sectionStore2?`<div style="font-size:11px;font-weight:500;color:var(--ink4);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.3px">Stock Tea House</div>${sectionStore2}`:''}
     ${sectionEquip?`<div style="font-size:11px;font-weight:500;color:var(--ink4);margin:12px 0 6px;text-transform:uppercase;letter-spacing:.3px">อุปกรณ์ Tea House</div>${sectionEquip}`:''}
     <div style="margin-top:16px;padding-top:12px;border-top:0.5px solid var(--line);display:flex;gap:8px;justify-content:flex-end">
       <button class="btn" onclick="scData={};renderStockCountPage()">ล้างทั้งหมด</button>
@@ -4236,7 +4236,7 @@ async function renderDailyWithdrawPage() {
       </div>
     </div>
     ${buildSection('finish','สินค้าสำเร็จรูป (จาก Factory)','ti-package')}
-    ${buildSection('store2','Store 2','ti-building-store')}`;
+    ${buildSection('store2','Stock Tea House','ti-building-store')}`;
 }
 
 function dwCopySectionText(pg) {
@@ -4307,7 +4307,7 @@ async function renderDwHistoryPage() {
       const recvTime = r.received_at
         ? new Date(r.received_at).toLocaleTimeString('th-TH',{hour:'2-digit',minute:'2-digit'})
         : '—';
-      const pgLabel = r.pg === 'finish' ? 'สินค้า' : 'Store 2';
+      const pgLabel = r.pg === 'finish' ? 'สินค้า' : 'Stock Tea House';
       return `<tr>
         <td style="padding:7px 12px;font-size:12px;font-weight:500">${r.item_name}</td>
         <td style="padding:7px 12px;font-size:10px;color:var(--ink4)">${pgLabel}</td>
@@ -4321,7 +4321,7 @@ async function renderDwHistoryPage() {
     return `<div style="margin-bottom:16px">
       <div style="padding:8px 12px;background:var(--s2);border:0.5px solid var(--line);border-radius:8px;margin-bottom:6px;display:flex;align-items:center;justify-content:space-between">
         <div style="font-size:12px;font-weight:500">${date}</div>
-        <div style="font-size:10px;color:var(--ink4)">${rows.length} รายการ · สินค้า ${byPg.finish.length} / Store 2 ${byPg.store2.length}</div>
+        <div style="font-size:10px;color:var(--ink4)">${rows.length} รายการ · สินค้า ${byPg.finish.length} / Stock Tea House ${byPg.store2.length}</div>
       </div>
       <div class="sc-table-wrap">
         <table class="sc-table">
@@ -4368,7 +4368,7 @@ function dwOpenAddModal(pg) {
       </button>
       <button onclick="dwSetAddTab('store2',this)" id="dw-tab-store2"
         style="font-size:12px;padding:6px 16px;border:none;background:transparent;cursor:pointer;font-family:inherit;border-bottom:2px solid transparent;color:var(--ink4)">
-        Store 2
+        Stock Tea House
       </button>
     </div>
     <div style="position:relative;margin-bottom:8px">
@@ -4659,7 +4659,7 @@ function dscRender() {
     </div>
 
     <div style="font-size:11px;font-weight:600;color:var(--ink4);text-transform:uppercase;letter-spacing:.3px;margin-bottom:10px">
-      <i class="ti ti-building-store" style="font-size:12px"></i> Store 2
+      <i class="ti ti-building-store" style="font-size:12px"></i> Stock Tea House
     </div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px">${store2CatTabs}</div>
     <div style="border:0.5px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:8px">
