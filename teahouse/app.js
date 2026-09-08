@@ -4013,16 +4013,34 @@ async function dwDoReceive(id, item, recvQty, lotId, lotSw) {
       if (lot) {
         const newLotStock = Math.max(0, lot.stock - recvQty);
         await sbFactory.from('lots').update({ stock: newLotStock }).eq('id', lotId);
-        // หัก item stock Factory ด้วย
         const { data: fItem } = await sbFactory.from('items').select('code,stock').eq('code', lot.item_code).single();
         if (fItem) await sbFactory.from('items').update({ stock: Math.max(0, fItem.stock - recvQty) }).eq('code', fItem.code);
       }
     }
-    // บวก Tea House
+    // บวก Tea House finish
     const m = masterDB.find(x=>x.code===item.item_code);
     if (m) { const ns = m.stock + recvQty; await sb.from('items').update({ stock: ns }).eq('code', item.item_code); m.stock = ns; }
-  } else {
-    // store2
+
+  } else if (item.pg === 'store2') {
+    // store2 (Stock Tea House) — หัก equip_th (Stock Store 2) ก่อน แล้วบวก store2
+    // หา equip_th code จาก mapping
+    const { data: map } = await sb.from('item_factory_map')
+      .select('th_code, factory_code')
+      .eq('factory_code', item.item_code)
+      .eq('note', 'equip_th ← store2')
+      .single();
+
+    if (map) {
+      // หัก stock จาก equip_th (Stock Store 2)
+      const eqItem = masterDB.find(x=>x.code===map.th_code);
+      if (eqItem) {
+        const newEqStock = Math.max(0, eqItem.stock - recvQty);
+        await sb.from('items').update({ stock: newEqStock }).eq('code', map.th_code);
+        eqItem.stock = newEqStock;
+      }
+    }
+
+    // บวก store2 (Stock Tea House)
     const m = masterDB.find(x=>x.code===item.item_code);
     if (m) { const ns = m.stock + recvQty; await sb.from('items').update({ stock: ns }).eq('code', item.item_code); m.stock = ns; }
   }
